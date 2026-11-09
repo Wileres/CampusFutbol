@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Servidor local (php -S :8000)",
+      "type": "shell",
+      "command": "php -S localhost:8000 -t public",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "none"
+    },
+    {
+      "label": "Composer install",
+      "type": "shell",
+      "command": "composer install",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint PHP (tots els fitxers)",
+      "type": "shell",
+      "command": "find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l | grep -v '^No syntax errors' || echo 'OK: sense errors de sintaxi'",
+      "problemMatcher": [],
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "Cron de prova (només gestors)",
+      "type": "shell",
+      "command": "php cron/send_weekly_test.php",
+      "problemMatcher": []
+    },
+    {
+      "label": "Crea BD local des de sql/schema.sql",
+      "type": "shell",
+      "command": "mysql -u root -p -e 'CREATE DATABASE IF NOT EXISTS c1futbolcamp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci' && mysql -u root -p c1futbolcamp < sql/schema.sql",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Xdebug: escolta (port 9003)",
+      "type": "php",
+      "request": "launch",
+      "port": 9003
+    },
+    {
+      "name": "PHP: executa l'script actual (CLI)",
+      "type": "php",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-dxdebug.start_with_request=yes"],
+      "env": { "XDEBUG_MODE": "debug,develop" }
+    }
+  ]
+}

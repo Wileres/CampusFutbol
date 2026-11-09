@@ -1,0 +1,40 @@
+# ── Secrets i configuració local ─────────────────────────────
+/config.php
+.env
+.env.*
+
+# ── Dependències (es restauren amb `composer install`) ───────
+/vendor/
+
+# ── Logs (poden contenir adreces de correu i trànsit SMTP) ───
+/logs/*
+!/logs/.htaccess
+!/logs/.gitkeep
+
+# ── Dades de producció: MAI al repositori ────────────────────
+/sql/*.dump.sql
+/sql/backup*
+/sql/*prod*
+*.sql.gz
+*.sql.zip
+c1futbolcamp.sql
+*.csv
+
+# ── Còpies de seguretat i temporals ──────────────────────────
+*.old
+*.bak
+*.orig
+*.swp
+*~
+*.zip
+*.tar.gz
+
+# ── Editor / SO ──────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.DS_Store
+Thumbs.db

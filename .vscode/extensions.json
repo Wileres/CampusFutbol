@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "bmewburn.vscode-intelephense-client",
+    "xdebug.php-debug",
+    "editorconfig.editorconfig",
+    "formulahendry.auto-rename-tag",
+    "cweijan.vscode-mysql-client2",
+    "eamodio.gitlens"
+  ]
+}
