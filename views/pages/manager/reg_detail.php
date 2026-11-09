@@ -66,12 +66,12 @@
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-fc align-middle mb-0">
-                        <thead><tr><th>Setmana</th><th>Modalitat</th><th class="text-center">Pagat</th><?php if($reg['status']==='confirmed'):?><th class="text-center">Acció</th><?php endif;?></tr></thead>
+                        <thead><tr><th>Setmana</th><th><?=weekDetailHeader()?></th><th class="text-center">Pagat</th><?php if($reg['status']==='confirmed'):?><th class="text-center">Acció</th><?php endif;?></tr></thead>
                         <tbody>
                         <?php foreach($selectedWeeks as $sw):?>
                         <tr>
                             <td><div class="fw-semibold small"><?=htmlspecialchars($sw['label'])?></div><small class="text-muted"><?=date('d/m',strtotime($sw['start_date']))?> – <?=date('d/m/Y',strtotime($sw['end_date']))?></small></td>
-                            <td><?=modalityBadge($sw['modality'])?></td>
+                            <td><?=weekDetailCell($sw,(bool)$reg['is_club_player'])?></td>
                             <td class="text-center">
                                 <?php if($sw['is_paid']):?><span class="badge bg-success"><i class="bi bi-check"></i> Sí</span><?php if($sw['paid_at']):?><div style="font-size:.7rem" class="text-muted"><?=date('d/m/Y',strtotime($sw['paid_at']))?></div><?php endif;?>
                                 <?php else:?><span class="badge bg-danger">Pendent</span><?php endif;?>
@@ -96,8 +96,8 @@
                 <div class="card-header-fc"><i class="bi bi-calculator me-2"></i>Desglossament</div>
                 <div class="card-body p-0">
                     <table class="table table-fc mb-0">
-                        <thead><tr><th>Modalitat</th><th class="text-center">Set.</th><th class="text-end">Subtotal</th></tr></thead>
-                        <tbody><?php foreach($pricing['breakdown'] as $mod=>$data):?><tr><td><?=modalityBadge($mod)?></td><td class="text-center"><?=$data['count']?></td><td class="text-end"><?=number_format($data['subtotal'],2,',','.')?> €</td></tr><?php endforeach;?></tbody>
+                        <thead><tr><th><?=breakdownHeader()?></th><th class="text-center">Set.</th><th class="text-end">Subtotal</th></tr></thead>
+                        <tbody><?php foreach($pricing['breakdown'] as $mod=>$data):?><tr><td><?=breakdownLabel($mod,$data)?></td><td class="text-center"><?=$data['count']?></td><td class="text-end"><?=number_format($data['subtotal'],2,',','.')?> €</td></tr><?php endforeach;?></tbody>
                         <tfoot><tr class="table-primary fw-bold"><td colspan="2">TOTAL</td><td class="text-end"><?=number_format($pricing['total'],2,',','.')?> €</td></tr></tfoot>
                     </table>
                 </div>

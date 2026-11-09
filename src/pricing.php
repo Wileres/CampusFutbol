@@ -31,3 +31,74 @@ function modalityBadge(string $mod): string {
     $c=match($mod){'8_13'=>'bg-info text-dark','8_15'=>'bg-warning text-dark','8_17'=>'bg-danger',default=>'bg-secondary'};
     return '<span class="badge '.$c.'">'.htmlspecialchars($l).'</span>';
 }
+
+// ── Preu personalitzat per setmana ───────────────────────────────────────────
+// Mode de preus: 'weekly' (preu propi a cada setmana, per defecte) o
+// 'tiered' (barem antic per modalitat i nombre de setmanes, desactivat però conservat).
+// Es canvia des de Configuració (setting `pricing_mode`).
+function isWeeklyPricing(): bool {
+    return getSetting('pricing_mode', 'weekly') !== 'tiered';
+}
+
+/** Preu d'una setmana per al tipus d'inscrit, o null si no està definit. */
+function weekPrice(array $w, bool $isClub): ?float {
+    $v = $w[$isClub ? 'price_club' : 'price_no_club'] ?? null;
+    return ($v === null || $v === '') ? null : (float)$v;
+}
+
+/**
+ * Càlcul del preu d'una inscripció segons el mode actiu.
+ * $rows: files amb `modality`, `label`, `price_club`, `price_no_club`.
+ * Retorna la mateixa estructura que calculatePrice(); en mode setmanal
+ * el breakdown té una entrada per setmana amb la clau 'label'.
+ */
+function priceRegistration(array $rows, bool $isClub): array {
+    if (!isWeeklyPricing()) {
+        return calculatePrice(array_column($rows, 'modality'), $isClub);
+    }
+    $breakdown = []; $total = 0.0; $err = false;
+    foreach (array_values($rows) as $i => $r) {
+        $p = weekPrice($r, $isClub);
+        if ($p === null) { $err = true; }
+        $breakdown['w'.$i] = ['label'=>(string)($r['label'] ?? ''),'count'=>1,'subtotal'=>$p ?? 0.0,'error'=>$p === null];
+        $total += $p ?? 0.0;
+    }
+    return ['breakdown'=>$breakdown,'total'=>$total,'counts'=>[],'error'=>$err];
+}
+
+/** Etiqueta d'una fila del desglossament (setmana o modalitat). */
+function breakdownLabel(string $key, array $data): string {
+    return isset($data['label']) ? '<span class="fw-semibold">'.htmlspecialchars($data['label']).'</span>' : modalityBadge($key);
+}
+function breakdownHeader(): string { return isWeeklyPricing() ? 'Setmana' : 'Modalitat'; }
+
+/** Cel·la de detall d'una setmana: preu (mode setmanal) o badge de modalitat. */
+function weekDetailCell(array $sw, bool $isClub): string {
+    if (!isWeeklyPricing()) return modalityBadge($sw['modality']);
+    $p = weekPrice($sw, $isClub);
+    return $p === null ? '<span class="text-muted">Preu pendent</span>'
+                       : '<span class="fw-semibold">'.number_format($p, 2, ',', '.').' €</span>';
+}
+function weekDetailHeader(): string { return isWeeklyPricing() ? 'Preu' : 'Modalitat'; }
+
+// ── Dates de setmana en català ───────────────────────────────────────────────
+function weekRangeText(string $start, string $end): string {
+    $mesos = [1=>'gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+    $de = fn(int $m): string => in_array($m, [4,8,10], true) ? "d'".$mesos[$m] : 'de '.$mesos[$m];
+    $s = strtotime($start); $e = strtotime($end);
+    $sd = (int)date('j',$s); $ed = (int)date('j',$e); $sm = (int)date('n',$s); $em = (int)date('n',$e);
+    if ($sd === $ed && $sm === $em) return 'El '.$sd.' '.$de($sm);
+    if ($sm === $em) return 'Del '.$sd.' al '.$ed.' '.$de($em);
+    return 'Del '.$sd.' '.$de($sm).' al '.$ed.' '.$de($em);
+}
+
+/** Nombre de dies lectius (dilluns–divendres) entre dues dates, ambdues incloses. */
+function weekDaysCount(string $start, string $end): int {
+    $s = strtotime($start); $e = strtotime($end); $n = 0; $all = 0;
+    for ($t = $s; $t <= $e; $t += 86400) { $all++; if ((int)date('N',$t) <= 5) $n++; }
+    return $n > 0 ? $n : $all;
+}
+function weekDaysText(string $start, string $end): string {
+    $n = weekDaysCount($start, $end);
+    return $n.($n === 1 ? ' dia' : ' dies');
+}

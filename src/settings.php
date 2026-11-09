@@ -68,3 +68,30 @@ function areRegistrationsBlocked(): bool
 
     return true;
 }
+
+// ── Textos editables de la pàgina d'inici ────────────────────────────────────
+// Valors per defecte; el gestor els pot canviar a «Textos inici» (settings `home_*`).
+// Un valor buit fa servir el text per defecte.
+const HOME_TEXT_DEFAULTS = [
+    'hero_emoji'       => '⚽',
+    'hero_title'       => '',   // buit → SITE_NAME
+    'hero_text'        => "Camp de futbol d'estiu per a nens i nenes de 5 a 14 anys.\nInscriviu el vostre fill o filla i viviu una experiència inoblidable!",
+    'btn_register'     => "Inscriure's ara",
+    'btn_new_reg'      => 'Nova inscripció',
+    'btn_info'         => 'Més informació',
+    'btn_my_regs'      => 'Les meves inscripcions',
+    'btn_login'        => 'Iniciar sessió',
+    'program_badge'    => '📅 Programa setmanal',
+    'menu_title'       => '🍽️ Menú de la setmana',
+    'activities_title' => '⚽ Activitats de la setmana',
+    'weeks_title'      => 'Setmanes disponibles',
+    'btn_prices'       => 'Veure preus',
+];
+
+/** Text editable de la portada (valor desat o per defecte). */
+function homeText(string $key): string
+{
+    $v = trim(getSetting('home_'.$key, ''));
+    if ($v !== '') return $v;
+    return $key === 'hero_title' ? SITE_NAME : (HOME_TEXT_DEFAULTS[$key] ?? '');
+}

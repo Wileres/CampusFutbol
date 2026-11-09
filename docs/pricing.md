@@ -1,5 +1,7 @@
 # Preus
 
+> **Mode actiu per defecte: preu per setmana** (`site_settings.pricing_mode = weekly`). Cada setmana té `price_club` i `price_no_club`; el total és la suma de les setmanes triades (`priceRegistration()`), i la modalitat horària no afecta el preu. El barem per modalitat descrit sota **continua al codi, desactivat**: es reactiva a Configuració → «Mode de preus» (`tiered`).
+
 Font de veritat: [`src/pricing.php`](../src/pricing.php). Els valors són **acumulats** pel nombre de setmanes (no es multiplica un preu unitari).
 
 Modalitats: `8_13` (8–13 h, sense menjador) · `8_15` (8–15 h amb menjador) · `8_17` (8–17 h amb menjador).

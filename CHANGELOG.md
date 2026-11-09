@@ -2,6 +2,12 @@
 
 Format basat en [Keep a Changelog](https://keepachangelog.com/ca/).
 
+## 2026-11
+### Afegit
+- **Preu personalitzat per setmana** (`weeks.price_club` / `price_no_club`) i nova pàgina de preus per setmanes (`views/pages/prices_weekly.php`). Migració `2026-11-09_preus_per_setmana.sql`.
+- Setting `pricing_mode` (`weekly` per defecte / `tiered`) a Configuració. El barem antic per modalitat **no s'ha eliminat**: es reactiva triant «Barem per modalitat».
+- **Editor de textos de la portada** (`manager-home`, menú Contingut → «Textos inici»): títol, presentació, botons i títols de secció (settings `home_*`, valors per defecte a `HOME_TEXT_DEFAULTS`).
+
 ## [Sense versió] – importació al repositori
 ### Afegit
 - Estructura de repositori: README, CLAUDE.md, docs/, `.gitignore`, `config.example.php`, `.editorconfig`, configuració de VS Code.

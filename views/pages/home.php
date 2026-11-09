@@ -1,32 +1,29 @@
 <div class="home-hero">
     <div class="container">
-        <div class="mb-4" style="font-size:4.5rem">⚽</div>
-        <h1><?= htmlspecialchars(SITE_NAME) ?></h1>
-        <p>
-            Camp de futbol d'estiu per a nens i nenes de 5 a 14 anys.<br>
-            Inscriviu el vostre fill o filla i viviu una experiència inoblidable!
-        </p>
+        <div class="mb-4" style="font-size:4.5rem"><?= e(homeText('hero_emoji')) ?></div>
+        <h1><?= e(homeText('hero_title')) ?></h1>
+        <p><?= nl2br(e(homeText('hero_text'))) ?></p>
         <?php if (!$registrationsBlocked): ?>
             <?php if (!isLoggedIn()): ?>
                 <a href="<?= SITE_URL ?>?p=register" class="btn btn-light fw-bold me-2 mb-2">
-                    <i class="bi bi-person-plus me-1"></i>Inscriure's ara
+                    <i class="bi bi-person-plus me-1"></i><?= e(homeText('btn_register')) ?>
                 </a>
             <?php else: ?>
                 <a href="<?= SITE_URL ?>?p=new-reg" class="btn btn-light fw-bold me-2 mb-2">
-                    <i class="bi bi-plus-circle me-1"></i>Nova inscripció
+                    <i class="bi bi-plus-circle me-1"></i><?= e(homeText('btn_new_reg')) ?>
                 </a>
             <?php endif; ?>
         <?php endif; ?>
         <a href="<?= SITE_URL ?>?p=info" class="btn btn-outline-light me-2 mb-2">
-            <i class="bi bi-info-circle me-1"></i>Més informació
+            <i class="bi bi-info-circle me-1"></i><?= e(homeText('btn_info')) ?>
         </a>
         <?php if (isLoggedIn() && !$registrationsBlocked): ?>
             <a href="<?= SITE_URL ?>?p=dashboard" class="btn btn-outline-light mb-2">
-                <i class="bi bi-grid me-1"></i>Les meves inscripcions
+                <i class="bi bi-grid me-1"></i><?= e(homeText('btn_my_regs')) ?>
             </a>
         <?php elseif (!isLoggedIn()): ?>
             <a href="<?= SITE_URL ?>?p=login" class="btn btn-outline-light mb-2">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sessió
+                <i class="bi bi-box-arrow-in-right me-1"></i><?= e(homeText('btn_login')) ?>
             </a>
         <?php endif; ?>
     </div>
@@ -105,7 +102,7 @@
         <!-- Títol de la secció -->
         <div class="text-center mb-4">
             <span class="badge rounded-pill mb-2" style="background:var(--fc-blue-bg);color:var(--fc-blue);font-size:.82rem;padding:6px 16px;font-weight:600">
-                📅 Programa setmanal
+                <?= e(homeText('program_badge')) ?>
             </span>
             <h2 class="fw-bold" style="color:var(--fc-blue-dark)"><?= e($_weekContent['label']) ?></h2>
             <p class="text-muted mb-0">
@@ -118,7 +115,7 @@
             <?php if (!empty($_hasMenu)): ?>
             <!-- MENÚ -->
             <div class="col-lg-6">
-                <h3 class="home-section-title">🍽️ Menú de la setmana</h3>
+                <h3 class="home-section-title"><?= e(homeText('menu_title')) ?></h3>
                 <div class="d-flex flex-column gap-2">
                     <?php foreach ($_days as $_key => $_label):
                         $_offset  = array_search($_key, array_keys($_days));
@@ -144,7 +141,7 @@
             <?php if (!empty($_hasAct)): ?>
             <!-- ACTIVITATS -->
             <div class="col-lg-6">
-                <h3 class="home-section-title">⚽ Activitats de la setmana</h3>
+                <h3 class="home-section-title"><?= e(homeText('activities_title')) ?></h3>
                 <div class="d-flex flex-column gap-2">
                     <?php foreach ($_days as $_key => $_label):
                         $_offset  = array_search($_key, array_keys($_days));
@@ -177,7 +174,7 @@
     if ($activeWeeks):
     ?>
     <div>
-        <h2 class="home-section-title">Setmanes disponibles</h2>
+        <h2 class="home-section-title"><?= e(homeText('weeks_title')) ?></h2>
         <div class="row g-3">
             <?php foreach ($activeWeeks as $w): ?>
             <div class="col-sm-6 col-lg-4 home-week-card">
@@ -197,10 +194,10 @@
     </div>
     <div class="text-center mt-5">
         <a href="<?= SITE_URL ?>?p=info" class="btn btn-outline-primary btn-lg me-2">
-            <i class="bi bi-info-circle me-1"></i>Més informació
+            <i class="bi bi-info-circle me-1"></i><?= e(homeText('btn_info')) ?>
         </a>
         <a href="<?= SITE_URL ?>?p=prices" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-table me-1"></i>Veure tarifes
+            <i class="bi bi-table me-1"></i><?= e(homeText('btn_prices')) ?>
         </a>
     </div>
     <?php endif; ?>

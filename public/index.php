@@ -46,7 +46,16 @@ case 'home':
 
 // ════════════════════════════════════════════════════════════════════════════
 case 'prices':
-    render('prices', [], 'Tarifes');
+    if (isWeeklyPricing()) {
+        $priceWeeks = getDB()->query(
+            'SELECT * FROM weeks WHERE active=1 AND end_date >= CURDATE()
+               AND (price_club IS NOT NULL OR price_no_club IS NOT NULL) ORDER BY start_date'
+        )->fetchAll();
+        render('prices_weekly', ['priceWeeks' => $priceWeeks], 'Preus');
+    } else {
+        // Barem antic per modalitat (desactivat per defecte; s'activa a Configuració)
+        render('prices', [], 'Tarifes');
+    }
     break;
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -329,10 +338,10 @@ case 'reg-summary':
     $st->execute([':id'=>$regId,':uid'=>$user['id']]);
     $reg = $st->fetch();
     if (!$reg) { setFlash('error','Inscripció no trobada.'); redirect(SITE_URL.'?p=dashboard'); }
-    $st = $db->prepare('SELECT rw.modality,w.id AS week_id,w.label,w.start_date,w.end_date FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
+    $st = $db->prepare('SELECT rw.modality,w.id AS week_id,w.label,w.start_date,w.end_date,w.price_club,w.price_no_club FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
     $st->execute([':id' => $regId]);
     $selectedWeeks = $st->fetchAll();
-    $pricing = calculatePrice(array_column($selectedWeeks,'modality'), (bool)$reg['is_club_player']);
+    $pricing = priceRegistration($selectedWeeks, (bool)$reg['is_club_player']);
     render('parent/reg_step3', ['reg'=>$reg,'selectedWeeks'=>$selectedWeeks,'pricing'=>$pricing], 'Resum');
     break;
 
@@ -348,11 +357,11 @@ case 'reg-confirm':
     $st->execute([':id'=>$regId,':uid'=>$user['id']]);
     $reg = $st->fetch();
     if (!$reg) { setFlash('error','Inscripció no trobada.'); redirect(SITE_URL.'?p=dashboard'); }
-    $st = $db->prepare('SELECT rw.modality,w.label,w.start_date,w.end_date FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
+    $st = $db->prepare('SELECT rw.modality,w.label,w.start_date,w.end_date,w.price_club,w.price_no_club FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
     $st->execute([':id' => $regId]);
     $selWeeks = $st->fetchAll();
     if (empty($selWeeks)) { setFlash('error','Sense setmanes seleccionades.'); redirect(SITE_URL.'?p=reg-summary&id='.$regId); }
-    $pricing = calculatePrice(array_column($selWeeks,'modality'), (bool)$reg['is_club_player']);
+    $pricing = priceRegistration($selWeeks, (bool)$reg['is_club_player']);
     if ($pricing['error']) { setFlash('error','Error en el càlcul.'); redirect(SITE_URL.'?p=reg-summary&id='.$regId); }
     $db->prepare('UPDATE registrations SET status="confirmed",confirmed_at=NOW(),total_amount=:amt WHERE id=:id')
        ->execute([':amt'=>$pricing['total'],':id'=>$regId]);
@@ -382,10 +391,10 @@ case 'reg-view':
     }
     $reg = $st->fetch();
     if (!$reg || $reg['status']!=='confirmed') { setFlash('error','Inscripció no trobada.'); redirect(SITE_URL.'?p=dashboard'); }
-    $st = $db->prepare('SELECT rw.id AS rw_id,rw.modality,rw.is_paid,rw.paid_at,w.label,w.start_date,w.end_date FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
+    $st = $db->prepare('SELECT rw.id AS rw_id,rw.modality,rw.is_paid,rw.paid_at,w.label,w.start_date,w.end_date,w.price_club,w.price_no_club FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
     $st->execute([':id' => $regId]);
     $selW    = $st->fetchAll();
-    $pricing = calculatePrice(array_column($selW,'modality'),(bool)$reg['is_club_player']);
+    $pricing = priceRegistration($selW, (bool)$reg['is_club_player']);
     render('parent/reg_view', ['reg'=>$reg,'selectedWeeks'=>$selW,'pricing'=>$pricing], 'Inscripció confirmada');
     break;
 
@@ -412,17 +421,25 @@ case 'manager-weeks':
         $end    = trim($_POST['end_date']   ?? '');
         $active = isset($_POST['active']) ? 1 : 0;
         $weekId = (int)($_POST['week_id']   ?? 0);
+        // Preus personalitzats (opcionals; acceptem coma decimal)
+        $prices = [];
+        foreach (['price_club'=>'de soci','price_no_club'=>'de no soci'] as $pk => $pl) {
+            $raw = str_replace(',', '.', trim($_POST[$pk] ?? ''));
+            if ($raw === '') { $prices[$pk] = null; }
+            elseif (!is_numeric($raw) || (float)$raw < 0 || (float)$raw > 9999) { $formErrors[] = "El preu $pl no és vàlid."; $prices[$pk] = null; }
+            else { $prices[$pk] = number_format((float)$raw, 2, '.', ''); }
+        }
         if (!notEmpty($label))     $formErrors[] = 'L\'etiqueta és obligatòria.';
         if (!validateDate($start)) $formErrors[] = 'Data d\'inici no vàlida.';
         if (!validateDate($end))   $formErrors[] = 'Data de fi no vàlida.';
         if (empty($formErrors) && $end < $start) $formErrors[] = 'La fi ha de ser posterior a l\'inici.';
         if (empty($formErrors)) {
-            if ($weekId > 0) $db->prepare('UPDATE weeks SET label=:l,start_date=:s,end_date=:e,active=:a WHERE id=:id')->execute([':l'=>$label,':s'=>$start,':e'=>$end,':a'=>$active,':id'=>$weekId]);
-            else $db->prepare('INSERT INTO weeks (label,start_date,end_date,active) VALUES (:l,:s,:e,:a)')->execute([':l'=>$label,':s'=>$start,':e'=>$end,':a'=>$active]);
+            if ($weekId > 0) $db->prepare('UPDATE weeks SET label=:l,start_date=:s,end_date=:e,active=:a,price_club=:pc,price_no_club=:pn WHERE id=:id')->execute([':l'=>$label,':s'=>$start,':e'=>$end,':a'=>$active,':pc'=>$prices['price_club'],':pn'=>$prices['price_no_club'],':id'=>$weekId]);
+            else $db->prepare('INSERT INTO weeks (label,start_date,end_date,active,price_club,price_no_club) VALUES (:l,:s,:e,:a,:pc,:pn)')->execute([':l'=>$label,':s'=>$start,':e'=>$end,':a'=>$active,':pc'=>$prices['price_club'],':pn'=>$prices['price_no_club']]);
             setFlash('success',$weekId>0?'Setmana actualitzada.':'Setmana afegida.');
             redirect(SITE_URL.'?p=manager-weeks');
         } else {
-            if ($weekId > 0) $editWeek=['id'=>$weekId,'label'=>$label,'start_date'=>$start,'end_date'=>$end,'active'=>$active];
+            if ($weekId > 0) $editWeek=['id'=>$weekId,'label'=>$label,'start_date'=>$start,'end_date'=>$end,'active'=>$active,'price_club'=>$prices['price_club'],'price_no_club'=>$prices['price_no_club']];
         }
     }
     $weeks = $db->query('SELECT w.*,COUNT(rw.id) AS reg_count FROM weeks w LEFT JOIN registration_weeks rw ON rw.week_id=w.id GROUP BY w.id ORDER BY w.start_date')->fetchAll();
@@ -502,10 +519,10 @@ case 'manager-reg':
     $st->execute([':id' => $regId]);
     $reg = $st->fetch();
     if (!$reg) { setFlash('error','Inscripció no trobada.'); redirect(SITE_URL.'?p=manager-regs'); }
-    $st = $db->prepare('SELECT rw.id AS rw_id,rw.modality,rw.is_paid,rw.paid_at,w.label,w.start_date,w.end_date FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
+    $st = $db->prepare('SELECT rw.id AS rw_id,rw.modality,rw.is_paid,rw.paid_at,w.label,w.start_date,w.end_date,w.price_club,w.price_no_club FROM registration_weeks rw JOIN weeks w ON w.id=rw.week_id WHERE rw.registration_id=:id ORDER BY w.start_date');
     $st->execute([':id' => $regId]);
     $selW    = $st->fetchAll();
-    $pricing = empty($selW)?['breakdown'=>[],'total'=>0,'error'=>false]:calculatePrice(array_column($selW,'modality'),(bool)$reg['is_club_player']);
+    $pricing = empty($selW)?['breakdown'=>[],'total'=>0,'error'=>false]:priceRegistration($selW, (bool)$reg['is_club_player']);
     $weekCount = count($selW);
     $paidCount = count(array_filter($selW,fn($w)=>$w['is_paid']));
     render('manager/reg_detail', ['reg'=>$reg,'selectedWeeks'=>$selW,'pricing'=>$pricing,'weekCount'=>$weekCount,'paidCount'=>$paidCount], 'Detall inscripció');
@@ -578,8 +595,14 @@ case 'manager-edit-reg':
             }
 
             // Recalcular l'import total i actualitzar la inscripció
-            $newModalities = array_values($newSelection);
-            $pricing       = calculatePrice($newModalities, (bool)$reg['is_club_player']);
+            $weeksById = [];
+            foreach ($allWeeks as $aw) $weeksById[(int)$aw['id']] = $aw;
+            $priceRows = [];
+            foreach ($newSelection as $wid => $mod) {
+                if (isset($weeksById[$wid])) $priceRows[] = array_merge($weeksById[$wid], ['modality'=>$mod]);
+            }
+            $pricing = priceRegistration($priceRows, (bool)$reg['is_club_player']);
+            if ($pricing['error']) throw new RuntimeException('Alguna setmana no té preu definit o supera el barem.');
             $db->prepare('UPDATE registrations SET total_amount=:amt WHERE id=:id')
                ->execute([':amt'=>$pricing['total'],':id'=>$regId]);
 
@@ -881,6 +904,33 @@ case 'manager-pages':
     break;
 
 // ════════════════════════════════════════════════════════════════════════════
+case 'manager-home':
+    requireManager();
+    $formErrors = [];
+    if ($method === 'POST') {
+        verifyCsrf();
+        if (isset($_POST['reset'])) {
+            // Restaurar valors per defecte: es buiden i s'usen els textos originals
+            saveSettings(array_fill_keys(array_map(fn($k)=>'home_'.$k, array_keys(HOME_TEXT_DEFAULTS)), ''));
+            setFlash('success', 'Textos restaurats als valors per defecte.');
+            redirect(SITE_URL.'?p=manager-home');
+        }
+        $save = [];
+        foreach (HOME_TEXT_DEFAULTS as $k => $def) {
+            $v = trim((string)($_POST[$k] ?? ''));
+            if (mb_strlen($v) > 500) $formErrors[] = 'Un dels textos supera els 500 caràcters.';
+            $save['home_'.$k] = $v;
+        }
+        if (empty($formErrors)) {
+            saveSettings($save);
+            setFlash('success', 'Textos de la pàgina d\'inici guardats.');
+            redirect(SITE_URL.'?p=manager-home');
+        }
+    }
+    render('manager/home_texts', ['formErrors'=>$formErrors], 'Textos inici');
+    break;
+
+// ════════════════════════════════════════════════════════════════════════════
 case 'manager-settings':
     requireManager();
     $formErrors = [];
@@ -894,6 +944,7 @@ case 'manager-settings':
         $ogTitle     = trim($_POST['og_title']       ?? '');
         $ogDesc      = trim($_POST['og_description'] ?? '');
         $ogImg       = trim($_POST['og_image_url']   ?? '');
+        $pricingMode = ($_POST['pricing_mode'] ?? 'weekly') === 'tiered' ? 'tiered' : 'weekly';
 
         // Validacions
         if ($blocked === '1' && !notEmpty($blockedMsg)) {
@@ -914,6 +965,7 @@ case 'manager-settings':
                 'og_title'                     => $ogTitle,
                 'og_description'               => $ogDesc,
                 'og_image_url'                 => $ogImg,
+                'pricing_mode'                 => $pricingMode,
             ]);
             setFlash('success', 'Configuració guardada correctament.');
             redirect(SITE_URL . '?p=manager-settings');

@@ -28,11 +28,11 @@ function wh3(int $c): string {
 <?php if(empty($selectedWeeks)):?>
 <div class="p-4 text-center text-muted">No heu seleccionat cap setmana. <a href="<?=SITE_URL?>?p=reg-weeks&id=<?=$reg['id']?>">Afegir</a></div>
 <?php else:?>
-<table class="table table-fc mb-0"><thead><tr><th>Setmana</th><th>Dates</th><th>Modalitat</th></tr></thead><tbody>
+<table class="table table-fc mb-0"><thead><tr><th>Setmana</th><th>Dates</th><th><?=weekDetailHeader()?></th></tr></thead><tbody>
 <?php foreach($selectedWeeks as $sw):?>
 <tr><td class="fw-semibold"><?=htmlspecialchars($sw['label'])?></td>
 <td class="text-muted small"><?=date('d/m/Y',strtotime($sw['start_date']))?> – <?=date('d/m/Y',strtotime($sw['end_date']))?></td>
-<td><?=modalityBadge($sw['modality'])?></td></tr>
+<td><?=weekDetailCell($sw,(bool)$reg['is_club_player'])?></td></tr>
 <?php endforeach;?>
 </tbody></table>
 <?php endif;?>
@@ -41,9 +41,9 @@ function wh3(int $c): string {
 <?php if(!empty($selectedWeeks)&&!$pricing['error']):?>
 <div class="card mb-4"><div class="card-header-fc"><i class="bi bi-calculator me-2"></i>Càlcul del preu</div>
 <div class="card-body p-0"><table class="table table-fc mb-0">
-<thead><tr><th>Modalitat</th><th class="text-center">Set.</th><th class="text-end">Subtotal</th></tr></thead>
+<thead><tr><th><?=breakdownHeader()?></th><th class="text-center">Set.</th><th class="text-end">Subtotal</th></tr></thead>
 <tbody><?php foreach($pricing['breakdown'] as $mod=>$data):?>
-<tr><td><?=modalityBadge($mod)?></td><td class="text-center"><?=$data['count']?></td><td class="text-end fw-semibold"><?=number_format($data['subtotal'],2,',','.')?> €</td></tr>
+<tr><td><?=breakdownLabel($mod,$data)?></td><td class="text-center"><?=$data['count']?></td><td class="text-end fw-semibold"><?=number_format($data['subtotal'],2,',','.')?> €</td></tr>
 <?php endforeach;?></tbody>
 <tfoot><tr class="table-primary fw-bold"><td colspan="2">TOTAL</td><td class="text-end fs-5"><?=number_format($pricing['total'],2,',','.')?> €</td></tr></tfoot>
 </table></div></div>

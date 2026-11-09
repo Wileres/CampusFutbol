@@ -94,6 +94,31 @@
             </div>
         </div>
 
+        <!-- ══ BLOC: Mode de preus ═════════════════════════════════════════════ -->
+        <?php $pm = ($settings['pricing_mode'] ?? 'weekly') === 'tiered' ? 'tiered' : 'weekly'; ?>
+        <div class="card mb-4">
+            <div class="card-header-fc"><i class="bi bi-currency-euro me-2"></i>Mode de preus</div>
+            <div class="card-body">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="pricing_mode" id="pmW" value="weekly" <?= $pm === 'weekly' ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="pmW">
+                        <strong>Preu per setmana</strong> <span class="badge bg-success">Recomanat</span><br>
+                        <span class="text-muted small">Cada setmana té el seu preu per a socis i no socis (es defineix a «Setmanes»). El total és la suma de les setmanes triades. Es mostra la pàgina de preus per setmanes.</span>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="pricing_mode" id="pmT" value="tiered" <?= $pm === 'tiered' ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="pmT">
+                        <strong>Barem per modalitat (antic)</strong><br>
+                        <span class="text-muted small">Preu acumulat segons modalitat horària (8–13, 8–15, 8–17) i nombre de setmanes. Conservat per poder-lo reactivar.</span>
+                    </label>
+                </div>
+                <div class="alert alert-warning small mt-3 mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Canviar el mode no modifica l'import ja desat de les inscripcions confirmades, però el desglossament que es mostra es recalcula amb el mode actiu.
+                </div>
+            </div>
+        </div>
+
         <!-- ══ BLOC 2: Open Graph / Xarxes socials ══════════════════════════════ -->
         <div class="card mb-4">
             <div class="card-header-fc">

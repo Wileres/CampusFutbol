@@ -37,6 +37,7 @@ Totes les pàgines passen per `public/index.php?p=<ruta>`. Permisos: **Pública*
 | `manager-weekly-content` | Menú i activitats setmanals (`&week=ID`); POST desa (i posa `email_sent=0`); `&send_test=1` envia el correu de prova als gestors |
 | `manager-export-csv` | Descàrrega CSV d'inscripcions |
 | `manager-cards` | Targetes de la portada (Quill) |
+| `manager-home` | Textos editables de la portada (títol, presentació, botons, títols de secció) |
 | `manager-pages` | Pàgines editables (`&slug=`) |
 | `manager-settings` | Bloqueig d'inscripcions i Open Graph |
 | `manager-test-email` | Envia un correu SMTP de prova |

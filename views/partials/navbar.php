@@ -18,7 +18,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $cur==='prices'?'active':'' ?>" href="<?= SITE_URL ?>?p=prices">
-                        <i class="bi bi-table me-1"></i>Tarifes
+                        <i class="bi bi-table me-1"></i>Preus
                     </a>
                 </li>
                 <li class="nav-item">
@@ -57,11 +57,16 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?= in_array($cur,['manager-cards','manager-pages','manager-settings'])?' active':'' ?>"
+                        <a class="nav-link dropdown-toggle <?= in_array($cur,['manager-home','manager-cards','manager-pages','manager-settings','manager-weekly-content'])?' active':'' ?>"
                            href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-pencil-square me-1"></i>Contingut
                         </a>
                         <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item <?= $cur==='manager-home'?'active':'' ?>" href="<?= SITE_URL ?>?p=manager-home">
+                                    <i class="bi bi-type me-2"></i>Textos inici
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item" href="<?= SITE_URL ?>?p=manager-cards">
                                     <i class="bi bi-card-text me-2"></i>Targetes inici

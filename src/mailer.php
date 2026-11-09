@@ -98,11 +98,13 @@ function sendConfirmationEmail(array $reg, array $selWeeks, array $pricing): boo
 
         $weeksRows = '';
         foreach ($selWeeks as $w)
-            $weeksRows .= '<tr><td>' . htmlspecialchars($w['label']) . '</td><td>' . htmlspecialchars(modalityLabel($w['modality'])) . '</td></tr>';
+            $weeksRows .= '<tr><td>' . htmlspecialchars($w['label']) . '</td><td>' . (isWeeklyPricing() ? ((($p = weekPrice($w, (bool)$reg['is_club_player'])) !== null) ? number_format($p, 2, ',', '.') . ' €' : '—') : htmlspecialchars(modalityLabel($w['modality']))) . '</td></tr>';
 
+        $weekCol = isWeeklyPricing() ? 'Preu' : 'Modalitat';
+        $bdCol = isWeeklyPricing() ? 'Setmana' : 'Modalitat';
         $priceRows = '';
         foreach ($pricing['breakdown'] as $mod => $data)
-            $priceRows .= '<tr><td>' . htmlspecialchars(modalityLabel($mod)) . '</td>'
+            $priceRows .= '<tr><td>' . htmlspecialchars(isset($data['label']) ? $data['label'] : modalityLabel($mod)) . '</td>'
                 . '<td style="text-align:center">' . $data['count'] . ' set.</td>'
                 . '<td style="text-align:right">' . number_format($data['subtotal'], 2, ',', '.') . ' €</td></tr>';
 
@@ -121,12 +123,12 @@ function sendConfirmationEmail(array $reg, array $selWeeks, array $pricing): boo
     <p>La inscripció de <strong>{$childName}</strong> ha estat confirmada.</p>
     <h3 style="color:#0d6efd;border-bottom:2px solid #0d6efd;padding-bottom:6px">Setmanes seleccionades</h3>
     <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:14px">
-      <thead><tr style="background:#0d6efd;color:#fff"><th style="text-align:left">Setmana</th><th style="text-align:left">Modalitat</th></tr></thead>
+      <thead><tr style="background:#0d6efd;color:#fff"><th style="text-align:left">Setmana</th><th style="text-align:left">{$weekCol}</th></tr></thead>
       <tbody>{$weeksRows}</tbody>
     </table>
     <h3 style="color:#0d6efd;border-bottom:2px solid #0d6efd;padding-bottom:6px;margin-top:24px">Resum econòmic</h3>
     <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:14px">
-      <thead><tr style="background:#0d6efd;color:#fff"><th style="text-align:left">Modalitat</th><th style="text-align:center">Set.</th><th style="text-align:right">Subtotal</th></tr></thead>
+      <thead><tr style="background:#0d6efd;color:#fff"><th style="text-align:left">{$bdCol}</th><th style="text-align:center">Set.</th><th style="text-align:right">Subtotal</th></tr></thead>
       <tbody>{$priceRows}</tbody>
       <tfoot><tr style="background:#e8f0fe;font-weight:bold"><td colspan="2">TOTAL</td><td style="text-align:right">{$totalFmt}</td></tr></tfoot>
     </table>

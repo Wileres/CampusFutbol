@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `weeks` (
   `start_date` date NOT NULL COMMENT 'Dilluns',
   `end_date`   date NOT NULL COMMENT 'Divendres',
   `active`     tinyint(1) NOT NULL DEFAULT 1,
+  `price_club`    decimal(8,2) DEFAULT NULL COMMENT 'Preu de la setmana per a socis (mode weekly)',
+  `price_no_club` decimal(8,2) DEFAULT NULL COMMENT 'Preu de la setmana per a no socis (mode weekly)',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -149,7 +151,8 @@ INSERT IGNORE INTO `site_settings` (`key`, `value`) VALUES
   ('registration_unblock_date',    ''),
   ('og_title',                     'Campus de Futbol'),
   ('og_description',               'Futbol, diversió i aprenentatge per a nens i nenes de 5 a 14 anys.'),
-  ('og_image_url',                 '');
+  ('og_image_url',                 ''),
+  ('pricing_mode',                 'weekly');
 
 INSERT IGNORE INTO `site_pages` (`slug`, `title`, `content`) VALUES
   ('mes-informacio', 'Més informació', '<p>Editeu aquest contingut des de la zona de gestor.</p>');
