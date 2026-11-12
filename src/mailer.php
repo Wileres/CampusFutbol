@@ -138,6 +138,8 @@ function sendConfirmationEmail(array $reg, array $selWeeks, array $pricing): boo
       <tr><td><strong>Tractament de dades (RGPD):</strong></td><td>Acceptat</td></tr>
     </table>
     <h3 style="color:#0d6efd;border-bottom:2px solid #0d6efd;padding-bottom:6px;margin-top:24px">Informació de pagament</h3>
+    <p style="font-size:14px;margin:0 0 8px">Podeu pagar <strong>en efectiu al bar del club</strong> o per <strong>transferència bancària</strong>:</p>
+    <p style="font-size:14px;margin:12px 0 4px"><strong>🏦 Transferència bancària</strong></p>
     <table cellpadding="6" cellspacing="0" style="font-size:14px">
       <tr><td><strong>Beneficiari:</strong></td><td>{$reg['payment_beneficiary']}</td></tr>
       <tr><td><strong>IBAN:</strong></td><td style="font-family:monospace">{$reg['iban']}</td></tr>
@@ -145,14 +147,15 @@ function sendConfirmationEmail(array $reg, array $selWeeks, array $pricing): boo
       <tr><td><strong>Import:</strong></td><td>{$totalFmt}</td></tr>
     </table>
     <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:12px;margin-top:16px;font-size:14px">
-      ⚠️ {$reg['payment_instructions']}
+      ⚠️ {$reg['payment_instructions']}<br>
+      💶 També podeu pagar <strong>en efectiu al bar del club</strong>.
     </div>
     <p style="margin-top:24px;font-size:13px;color:#6c757d"><em>Correu generat automàticament.</em></p>
   </div>
   <div style="background:#f1f3f5;padding:16px 40px;font-size:12px;color:#868e96;text-align:center">© {$reg['site_name']}</div>
 </div></body></html>
 HTML;
-        $mail->AltBody = "Confirmació de {$childName}. Total: {$totalFmt}. IBAN: " . IBAN . "\n" . PAYMENT_INSTRUCTIONS;
+        $mail->AltBody = "Confirmació de {$childName}. Total: {$totalFmt}. Es pot pagar en efectiu al bar del club o per transferència bancària. IBAN: " . IBAN . "\n" . PAYMENT_INSTRUCTIONS;
         $mail->send();
         _writeMailerLogFile($recipient, true, mailerLastLog());
         return true;
