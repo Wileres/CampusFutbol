@@ -54,7 +54,7 @@ function wh3(int $c): string {
 <div class="card mb-4"><div class="card-header-fc"><i class="bi bi-wallet2 me-2"></i>Com es pot pagar</div>
 <div class="card-body">
 <div class="row g-3">
-<div class="col-md-6"><div class="d-flex gap-3"><i class="bi bi-cash-coin fs-3 text-fc"></i><div><div class="fw-bold">En efectiu</div><div class="small text-muted">Al bar del club.</div></div></div></div>
+<div class="col-md-6"><div class="d-flex gap-3"><i class="bi bi-cash-coin fs-3 text-fc"></i><div><div class="fw-bold">En efectiu</div><div class="small text-muted">Per pagaments en efectiu contactar amb Enric al telèfon 676006300.</div></div></div></div>
 <div class="col-md-6"><div class="d-flex gap-3"><i class="bi bi-bank fs-3 text-fc"></i><div><div class="fw-bold">Transferència bancària</div><div class="small text-muted">IBAN: <span class="font-monospace"><?=htmlspecialchars(IBAN)?></span></div></div></div></div>
 </div>
 </div></div>
